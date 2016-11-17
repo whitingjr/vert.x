@@ -18,6 +18,8 @@ package io.vertx.core.http;
 import io.vertx.codegen.annotations.CacheReturn;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.MultiMap;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -54,5 +56,15 @@ public interface HttpResponse<T> {
    */
   @CacheReturn
   T body();
+
+  Buffer bodyAsBuffer();
+
+  String bodyAsString();
+
+  String bodyAsString(String enc);
+
+  JsonObject bodyAsJsonObject();
+
+  <T> T bodyAs(Class<T> clazz);
 
 }

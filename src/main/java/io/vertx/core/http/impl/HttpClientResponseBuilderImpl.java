@@ -35,6 +35,13 @@ import java.util.function.Function;
  */
 class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
 
+  private static final Function<Buffer, JsonObject> jsonObjectUnmarshaller = buff -> new JsonObject(buff.toString());
+  private static final Function<Buffer, String> utf8Unmarshaller = Buffer::toString;
+
+  private static Function<Buffer, String> stringUnmarshaller(String encoding) {
+    return buff -> buff.toString(encoding);
+  }
+
   private final HttpClientRequestBuilder requestBuilder;
   private final Function<Buffer, T> bodyUnmarshaller;
 
@@ -45,12 +52,17 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
 
   @Override
   public HttpClientResponseBuilder<String> asString() {
-    return new HttpClientResponseBuilderImpl<>(requestBuilder, Buffer::toString);
+    return new HttpClientResponseBuilderImpl<>(requestBuilder, utf8Unmarshaller);
+  }
+
+  @Override
+  public HttpClientResponseBuilder<String> asString(String encoding) {
+    return new HttpClientResponseBuilderImpl<>(requestBuilder, stringUnmarshaller(encoding));
   }
 
   @Override
   public HttpClientResponseBuilder<JsonObject> asJsonObject() {
-    return new HttpClientResponseBuilderImpl<>(requestBuilder, buff -> new JsonObject(buff.toString()));
+    return new HttpClientResponseBuilderImpl<>(requestBuilder, jsonObjectUnmarshaller);
   }
 
   @Override
@@ -98,6 +110,26 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
               @Override
               public T body() {
                 return body;
+              }
+              @Override
+              public Buffer bodyAsBuffer() {
+                return buff;
+              }
+              @Override
+              public String bodyAsString() {
+                return utf8Unmarshaller.apply(buff);
+              }
+              @Override
+              public String bodyAsString(String encoding) {
+                return buff.toString(encoding);
+              }
+              @Override
+              public JsonObject bodyAsJsonObject() {
+                return jsonObjectUnmarshaller.apply(buff);
+              }
+              @Override
+              public <T1> T1 bodyAs(Class<T1> clazz) {
+                throw new UnsupportedOperationException("todo");
               }
             });
           }

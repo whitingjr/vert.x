@@ -19,6 +19,8 @@ public interface HttpClientResponseBuilder<T> {
 
   HttpClientResponseBuilder<String> asString();
 
+  HttpClientResponseBuilder<String> asString(String encoding);
+
   HttpClientResponseBuilder<JsonObject> asJsonObject();
 
   <T> HttpClientResponseBuilder<T> as(Class<T> clazz);

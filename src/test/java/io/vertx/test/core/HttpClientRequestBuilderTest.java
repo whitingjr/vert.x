@@ -309,6 +309,22 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
   }
 
   @Test
+  public void testAsJsonObjectUnknownContentType() throws Exception {
+    JsonObject expected = new JsonObject().put("cheese", "Goat Cheese").put("wine", "Condrieu");
+    server.requestHandler(req -> {
+      req.response().end(expected.encode());
+    });
+    startServer();
+    HttpClientRequestBuilder get = client.createGet(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
+    get.bufferBody().send(onSuccess(resp -> {
+      assertEquals(200, resp.statusCode());
+      assertEquals(expected, resp.bodyAsJsonObject());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testBodyUnmarshallingError() throws Exception {
     server.requestHandler(req -> {
       req.response().end("not-json-object");
