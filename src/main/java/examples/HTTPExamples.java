@@ -20,7 +20,10 @@ import io.vertx.core.MultiMap;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.AsyncFile;
+import io.vertx.core.file.FileSystem;
+import io.vertx.core.file.OpenOptions;
 import io.vertx.core.http.*;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.net.ProxyOptions;
 import io.vertx.core.net.ProxyType;
 import io.vertx.core.streams.Pump;
@@ -733,6 +736,59 @@ public class HTTPExamples {
         });
       });
     });
+  }
+
+  public void httpClientBuilderGet(HttpClient client) {
+    client
+        .createGet(8080, "localhost", "/something")
+        .send(ar -> {
+          if (ar.succeeded()) {
+            // Obtain response
+            HttpClientResponse resp = ar.result();
+          }
+    });
+  }
+
+  public void httpClientBuilderMultipleGet(HttpClient client) {
+    HttpClientRequestBuilder get = client.createGet(8080, "localhost", "/something");
+    get.send(ar -> {
+    });
+    // Same request again
+    get.send(ar -> {
+    });
+  }
+
+  public void httpClientBuilderSendStream(HttpClient client, FileSystem fs) {
+    AsyncFile file = fs.openBlocking("content.txt", new OpenOptions());
+    client
+        .createGet(8080, "localhost", "/something")
+        .send(file, resp -> {
+        });
+  }
+
+  public void httpClientBuilderBufferBody(HttpClient client) {
+    client
+        .createGet(8080, "localhost", "/something")
+        .bufferBody()
+        .send(ar -> {
+          if (ar.succeeded()) {
+            HttpResponse<Buffer> resp = ar.result();
+            JsonObject body = resp.bodyAsJsonObject();
+          }
+        });
+  }
+
+  public void httpClientBuilderBufferBodyDecodeAsJsonObject(HttpClient client) {
+    client
+        .createGet(8080, "localhost", "/something")
+        .bufferBody()
+        .asJsonObject()
+        .send(ar -> {
+          if (ar.succeeded()) {
+            HttpResponse<JsonObject> resp = ar.result();
+            JsonObject body = resp.body();
+          }
+        });
   }
 
 }
