@@ -47,7 +47,7 @@ public interface HttpClientResponseBuilder<T> {
   HttpClientResponseBuilder<JsonObject> asJsonObject();
 
   /**
-   * Configure the builder to decode the response using a specified {@code type}.
+   * Configure the builder to decode the response using a specified {@code type} using the Jackson mapper.
    *
    * @return a new {@code HttpClientResponseBuilder} instance decoding the response as specified type
    */

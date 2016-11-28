@@ -22,6 +22,22 @@ import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
 
 /**
+ * An HTTP response.
+ * <p>
+ * The usual HTTP response attributes are available:
+ * <ul>
+ *   <li>{@link #statusCode()} the HTTP status code</li>
+ *   <li>{@link #statusMessage()} the HTTP status message</li>
+ *   <li>{@link #headers()} the HTTP headers</li>
+ *   <li>{@link #version()} the HTTP version</li>
+ * </ul>
+ * <p>
+ * The body of the response is returned by {@link #body()} decoded as the format specified by the {@link HttpClientResponseBuilder} that
+ * built the response.
+ * <p>
+ * Keep in mind that using this {@code HttpResponse} impose to fully buffer the response body and should be used for payload
+ * that can fit in memory.
+ *
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
  */
 @VertxGen
@@ -52,19 +68,34 @@ public interface HttpResponse<T> {
   MultiMap headers();
 
   /**
-   * @return the response body
+   * @return the response body in the format it was decoded.
    */
   @CacheReturn
   T body();
 
+  /**
+   * @return the response body decoded as a {@link Buffer}
+   */
   Buffer bodyAsBuffer();
 
+  /**
+   * @return the response body decoded as a {@code String}
+   */
   String bodyAsString();
 
-  String bodyAsString(String enc);
+  /**
+   * @return the response body decoded as a {@code String} given a specific {@code encoding}
+   */
+  String bodyAsString(String encoding);
 
+  /**
+   * @return the response body decoded as a json object
+   */
   JsonObject bodyAsJsonObject();
 
+  /**
+   * @return the response body decoded as the specified {@code type} with the Jackson mapper.
+   */
   <R> R bodyAs(Class<R> type);
 
 }
