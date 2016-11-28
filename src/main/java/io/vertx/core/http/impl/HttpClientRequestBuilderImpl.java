@@ -60,30 +60,30 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
   }
 
   @Override
-  public HttpClientRequestBuilder method(HttpMethod method) {
+  public HttpClientRequestBuilder method(HttpMethod value) {
     HttpClientRequestBuilderImpl other = new HttpClientRequestBuilderImpl(this);
-    other.method = method;
+    other.method = value;
     return other;
   }
 
   @Override
-  public HttpClientRequestBuilder port(int port) {
+  public HttpClientRequestBuilder port(int value) {
     HttpClientRequestBuilderImpl other = new HttpClientRequestBuilderImpl(this);
-    other.port = port;
+    other.port = value;
     return other;
   }
 
   @Override
-  public HttpClientRequestBuilder host(String host) {
+  public HttpClientRequestBuilder host(String value) {
     HttpClientRequestBuilderImpl other = new HttpClientRequestBuilderImpl(this);
-    other.host = host;
+    other.host = value;
     return other;
   }
 
   @Override
-  public HttpClientRequestBuilder requestURI(String requestURI) {
+  public HttpClientRequestBuilder requestURI(String value) {
     HttpClientRequestBuilderImpl other = new HttpClientRequestBuilderImpl(this);
-    other.requestURI = requestURI;
+    other.requestURI = value;
     return other;
   }
 
@@ -98,8 +98,8 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
   }
 
   @Override
-  public void send(ReadStream<Buffer> stream, Handler<AsyncResult<HttpClientResponse>> handler) {
-    perform(stream, handler);
+  public void send(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler) {
+    perform(body, handler);
   }
 
   @Override
