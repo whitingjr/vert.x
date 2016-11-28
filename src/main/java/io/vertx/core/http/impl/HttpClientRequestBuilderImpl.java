@@ -27,6 +27,7 @@ import io.vertx.core.http.HttpClientRequestBuilder;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpClientResponseBuilder;
 import io.vertx.core.http.HttpMethod;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.Pump;
 import io.vertx.core.streams.ReadStream;
@@ -98,7 +99,7 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
   }
 
   @Override
-  public void send(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler) {
+  public void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler) {
     perform(body, handler);
   }
 
@@ -107,7 +108,17 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
     perform(null, handler);
   }
 
-  private void perform(ReadStream<Buffer> stream, Handler<AsyncResult<HttpClientResponse>> handler) {
+  @Override
+  public void sendBuffer(Buffer body, Handler<AsyncResult<HttpClientResponse>> handler) {
+    perform(body, handler);
+  }
+
+  @Override
+  public void sendJson(Object body, Handler<AsyncResult<HttpClientResponse>> handler) {
+    perform(body, handler);
+  }
+
+  private void perform(Object body, Handler<AsyncResult<HttpClientResponse>> handler) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest req = client.request(method, port, host, requestURI);
     if (headers != null) {
@@ -123,22 +134,28 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
         fut.complete(resp);
       }
     });
-    if (stream != null) {
-      if (headers == null || !headers.contains("Content-Length")) {
-        req.setChunked(true);
-      }
-      Pump pump = Pump.pump(stream, req);
-      stream.exceptionHandler(err -> {
-        req.reset();
-        if (!fut.isComplete()) {
-          fut.fail(err);
+    if (body != null) {
+      if (body instanceof ReadStream<?>) {
+        ReadStream<Buffer> stream = (ReadStream<Buffer>) body;
+        if (headers == null || !headers.contains("Content-Length")) {
+          req.setChunked(true);
         }
-      });
-      stream.endHandler(v -> {
-        pump.stop();
-        req.end();
-      });
-      pump.start();
+        Pump pump = Pump.pump(stream, req);
+        stream.exceptionHandler(err -> {
+          req.reset();
+          if (!fut.isComplete()) {
+            fut.fail(err);
+          }
+        });
+        stream.endHandler(v -> {
+          pump.stop();
+          req.end();
+        });
+        pump.start();
+      } else {
+        Buffer buffer = body instanceof Buffer ? (Buffer) body : Buffer.buffer(Json.encode(body));
+        req.end(buffer);
+      }
     } else {
       req.end();
     }

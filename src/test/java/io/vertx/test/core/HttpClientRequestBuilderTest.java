@@ -10,6 +10,7 @@ import io.vertx.core.http.HttpClientRequestBuilder;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.DecodeException;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
 import io.vertx.test.core.jackson.WineAndCheese;
@@ -19,6 +20,7 @@ import java.io.File;
 import java.net.ConnectException;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:julien@julienviet.com">Julien Viet</a>
@@ -141,11 +143,58 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
       if (!chunked) {
         builder = builder.putHeader("Content-Length", "" + expected.length());
       }
-      builder.send(asyncFile, onSuccess(resp -> {
+      builder.sendStream(asyncFile, onSuccess(resp -> {
             assertEquals(200, resp.statusCode());
             complete();
           }));
     });
+    await();
+  }
+
+  @Test
+  public void testSendJsonObjectBody() throws Exception {
+    JsonObject body = new JsonObject().put("wine", "Chateauneuf Du Pape").put("cheese", "roquefort");
+    testSendBody(body, buff -> assertEquals(body, buff.toJsonObject()));
+  }
+
+  @Test
+  public void testSendJsonObjectPojoBody() throws Exception {
+    testSendBody(new WineAndCheese().setCheese("roquefort").setWine("Chateauneuf Du Pape"),
+        buff -> assertEquals(new JsonObject().put("wine", "Chateauneuf Du Pape").put("cheese", "roquefort"), buff.toJsonObject()));
+  }
+
+  @Test
+  public void testSendJsonArrayBody() throws Exception {
+    JsonArray body = new JsonArray().add(0).add(1).add(2);
+    testSendBody(body, buff -> assertEquals(body, buff.toJsonArray()));
+  }
+
+  @Test
+  public void testSendBufferBody() throws Exception {
+    Buffer body = TestUtils.randomBuffer(2048);
+    testSendBody(body, buff -> assertEquals(body, buff));
+  }
+
+  private void testSendBody(Object body, Consumer<Buffer> checker) throws Exception {
+    waitFor(2);
+    server.requestHandler(req -> {
+      req.bodyHandler(buff -> {
+        checker.accept(buff);
+        complete();
+        req.response().end();
+      });
+    });
+    startServer();
+    HttpClientRequestBuilder post = client.createPost(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
+    if (body instanceof Buffer) {
+      post.sendBuffer((Buffer) body, onSuccess(resp -> {
+        complete();
+      }));
+    } else {
+      post.sendJson(body, onSuccess(resp -> {
+        complete();
+      }));
+    }
     await();
   }
 
@@ -169,7 +218,7 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
     });
     startServer();
     post.putHeader("Content-Length", "2048")
-        .send(new ReadStream<Buffer>() {
+        .sendStream(new ReadStream<Buffer>() {
           @Override
           public ReadStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
             return this;
@@ -213,7 +262,7 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
     });
     Throwable cause = new Throwable();
     startServer();
-    post.send(new ReadStream<Buffer>() {
+    post.sendStream(new ReadStream<Buffer>() {
           @Override
           public ReadStream<Buffer> exceptionHandler(Handler<Throwable> handler) {
             if (handler != null) {
@@ -257,7 +306,7 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
     });
     Throwable cause = new Throwable();
     startServer();
-    post.send(new ReadStream<Buffer>() {
+    post.sendStream(new ReadStream<Buffer>() {
       Handler<Throwable> exceptionHandler;
       @Override
       public ReadStream<Buffer> exceptionHandler(Handler<Throwable> handler) {

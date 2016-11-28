@@ -762,7 +762,7 @@ public class HTTPExamples {
     AsyncFile file = fs.openBlocking("content.txt", new OpenOptions());
     client
         .createGet(8080, "localhost", "/something")
-        .send(file, resp -> {
+        .sendStream(file, resp -> {
         });
   }
 

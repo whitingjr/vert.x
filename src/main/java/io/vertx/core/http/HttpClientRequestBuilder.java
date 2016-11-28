@@ -4,7 +4,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
-import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
 
 /**
@@ -19,7 +18,7 @@ import io.vertx.core.streams.ReadStream;
  * After the request builder has been configured, the methods
  * <ul>
  *   <li>{@link #send(Handler)}</li>
- *   <li>{@link #send(ReadStream, Handler)}</li>
+ *   <li>{@link #sendStream(ReadStream, Handler)}</li>
  *   <li>{@link #bufferBody()}</li>
  * </ul>
  * can be called.
@@ -76,7 +75,21 @@ public interface HttpClientRequestBuilder {
    *
    * @param body the body
    */
-  void send(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler);
+  void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler);
+
+  /**
+   * Like {@link #send(Handler)} but with an HTTP request {@code body} buffer.
+   *
+   * @param body the body
+   */
+  void sendBuffer(Buffer body, Handler<AsyncResult<HttpClientResponse>> handler);
+
+  /**
+   * Like {@link #send(Handler)} but with an HTTP request {@code body} object encoded as json.
+   *
+   * @param body the body
+   */
+  void sendJson(Object body, Handler<AsyncResult<HttpClientResponse>> handler);
 
   /**
    * Send a request, the {@code handler} will receive the response as an {@link HttpClientResponse}.
