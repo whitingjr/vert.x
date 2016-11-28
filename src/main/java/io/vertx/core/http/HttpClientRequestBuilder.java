@@ -85,7 +85,8 @@ public interface HttpClientRequestBuilder {
   void sendBuffer(Buffer body, Handler<AsyncResult<HttpClientResponse>> handler);
 
   /**
-   * Like {@link #send(Handler)} but with an HTTP request {@code body} object encoded as json.
+   * Like {@link #send(Handler)} but with an HTTP request {@code body} object encoded as json and the content type
+   * set to {@code application/json}.
    *
    * @param body the body
    */

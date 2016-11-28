@@ -146,8 +146,18 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
   }
 
   @Override
-  public void send(ReadStream<Buffer> body, Handler<AsyncResult<HttpResponse<T>>> handler) {
+  public void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpResponse<T>>> handler) {
     requestBuilder.sendStream(body, createClientResponseHandler(Future.<HttpResponse<T>>future().setHandler(handler)));
+  }
+
+  @Override
+  public void sendBuffer(Buffer body, Handler<AsyncResult<HttpResponse<T>>> handler) {
+    requestBuilder.sendBuffer(body, createClientResponseHandler(Future.<HttpResponse<T>>future().setHandler(handler)));
+  }
+
+  @Override
+  public void sendJson(Object body, Handler<AsyncResult<HttpResponse<T>>> handler) {
+    requestBuilder.sendJson(body, createClientResponseHandler(Future.<HttpResponse<T>>future().setHandler(handler)));
   }
 
   @Override

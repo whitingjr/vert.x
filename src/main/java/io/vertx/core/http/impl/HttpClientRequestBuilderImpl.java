@@ -26,6 +26,7 @@ import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.http.HttpClientRequestBuilder;
 import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpClientResponseBuilder;
+import io.vertx.core.http.HttpHeaders;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -100,25 +101,25 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
 
   @Override
   public void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler) {
-    perform(body, handler);
+    perform(null, body, handler);
   }
 
   @Override
   public void send(Handler<AsyncResult<HttpClientResponse>> handler) {
-    perform(null, handler);
+    perform(null, null, handler);
   }
 
   @Override
   public void sendBuffer(Buffer body, Handler<AsyncResult<HttpClientResponse>> handler) {
-    perform(body, handler);
+    perform(null, body, handler);
   }
 
   @Override
   public void sendJson(Object body, Handler<AsyncResult<HttpClientResponse>> handler) {
-    perform(body, handler);
+    perform("application/json", body, handler);
   }
 
-  private void perform(Object body, Handler<AsyncResult<HttpClientResponse>> handler) {
+  private void perform(String contentType, Object body, Handler<AsyncResult<HttpClientResponse>> handler) {
     Future<HttpClientResponse> fut = Future.future();
     HttpClientRequest req = client.request(method, port, host, requestURI);
     if (headers != null) {
@@ -135,9 +136,12 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
       }
     });
     if (body != null) {
+      if (contentType != null) {
+        req.putHeader(HttpHeaders.CONTENT_TYPE, contentType);
+      }
       if (body instanceof ReadStream<?>) {
         ReadStream<Buffer> stream = (ReadStream<Buffer>) body;
-        if (headers == null || !headers.contains("Content-Length")) {
+        if (headers == null || !headers.contains(HttpHeaders.CONTENT_LENGTH)) {
           req.setChunked(true);
         }
         Pump pump = Pump.pump(stream, req);

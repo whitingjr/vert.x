@@ -26,7 +26,22 @@ public interface HttpClientResponseBuilder<T> {
    *
    * @param body the body
    */
-  void send(ReadStream<Buffer> body, Handler<AsyncResult<HttpResponse<T>>> handler);
+  void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpResponse<T>>> handler);
+
+  /**
+   * Like {@link #send(Handler)} but with an HTTP request {@code body} buffer.
+   *
+   * @param body the body
+   */
+  void sendBuffer(Buffer body, Handler<AsyncResult<HttpResponse<T>>> handler);
+
+  /**
+   * Like {@link #send(Handler)} but with an HTTP request {@code body} json and the content type
+   * set to {@code application/json}.
+   *
+   * @param body the body
+   */
+  void sendJson(Object body, Handler<AsyncResult<HttpResponse<T>>> handler);
 
   /**
    * Configure the builder to decode the response as a {@code String}.
