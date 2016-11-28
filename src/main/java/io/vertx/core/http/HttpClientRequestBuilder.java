@@ -71,19 +71,6 @@ public interface HttpClientRequestBuilder {
    */
   HttpClientRequestBuilder putHeader(String name, String value);
 
-  // Could be called end() instead ?
-  // For RxJava we could generate with send(Observable<Buffer> stream
-  // would it work well ? i.e could the Observable<Buffer> could be subscribed easily ?
-  // in the case of FileSystem it *should* work (need to check):
-
-  // Observable<Buffer> fileObs = fileSystem.open("file.txt", new OpenOptions());
-  // Observable<HttpClientResponse> respObs = httpClient.createPost().send(fileObs);
-  // respObs.subscribe(resp -> {});
-
-  // the idea is that when calling a method with an Observable, the original method should be called
-  // with a subscription
-  // as the Handler<AsyncResult> delays the call (on subscribe) it should work
-
   /**
    * Like {@link #send(Handler)} but with an HTTP request {@code body} stream.
    *
