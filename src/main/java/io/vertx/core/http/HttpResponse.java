@@ -65,6 +65,6 @@ public interface HttpResponse<T> {
 
   JsonObject bodyAsJsonObject();
 
-  <T> T bodyAs(Class<T> clazz);
+  <R> R bodyAs(Class<R> type);
 
 }

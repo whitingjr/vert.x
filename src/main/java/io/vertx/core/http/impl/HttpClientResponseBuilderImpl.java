@@ -25,6 +25,7 @@ import io.vertx.core.http.HttpClientResponse;
 import io.vertx.core.http.HttpClientResponseBuilder;
 import io.vertx.core.http.HttpResponse;
 import io.vertx.core.http.HttpVersion;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
 
@@ -40,6 +41,10 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
 
   private static Function<Buffer, String> stringUnmarshaller(String encoding) {
     return buff -> buff.toString(encoding);
+  }
+
+  private static <R> Function<Buffer, R> jsonUnmarshaller(Class<R> type) {
+    return buff -> Json.decodeValue(buff.toString(), type);
   }
 
   private final HttpClientRequestBuilder requestBuilder;
@@ -66,8 +71,8 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
   }
 
   @Override
-  public <T> HttpClientResponseBuilder<T> as(Class<T> clazz) {
-    throw new UnsupportedOperationException();
+  public <R> HttpClientResponseBuilder<R> as(Class<R> type) {
+    return new HttpClientResponseBuilderImpl<>(requestBuilder, jsonUnmarshaller(type));
   }
 
   private Handler<AsyncResult<HttpClientResponse>> createClientResponseHandler(Future<HttpResponse<T>> fut) {
@@ -128,8 +133,8 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
                 return jsonObjectUnmarshaller.apply(buff);
               }
               @Override
-              public <T1> T1 bodyAs(Class<T1> clazz) {
-                throw new UnsupportedOperationException("todo");
+              public <R> R bodyAs(Class<R> type) {
+                return jsonUnmarshaller(type).apply(buff);
               }
             });
           }

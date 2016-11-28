@@ -12,6 +12,7 @@ import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
+import io.vertx.test.core.jackson.WineAndCheese;
 import org.junit.Test;
 
 import java.io.File;
@@ -309,6 +310,22 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
   }
 
   @Test
+  public void testAsJsonMapped() throws Exception {
+    JsonObject expected = new JsonObject().put("cheese", "Goat Cheese").put("wine", "Condrieu");
+    server.requestHandler(req -> {
+      req.response().end(expected.encode());
+    });
+    startServer();
+    HttpClientRequestBuilder get = client.createGet(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
+    get.bufferBody().as(WineAndCheese.class).send(onSuccess(resp -> {
+      assertEquals(200, resp.statusCode());
+      assertEquals(new WineAndCheese().setCheese("Goat Cheese").setWine("Condrieu"), resp.body());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
   public void testAsJsonObjectUnknownContentType() throws Exception {
     JsonObject expected = new JsonObject().put("cheese", "Goat Cheese").put("wine", "Condrieu");
     server.requestHandler(req -> {
@@ -319,6 +336,22 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
     get.bufferBody().send(onSuccess(resp -> {
       assertEquals(200, resp.statusCode());
       assertEquals(expected, resp.bodyAsJsonObject());
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testAsJsonMappedUnknownContentType() throws Exception {
+    JsonObject expected = new JsonObject().put("cheese", "Goat Cheese").put("wine", "Condrieu");
+    server.requestHandler(req -> {
+      req.response().end(expected.encode());
+    });
+    startServer();
+    HttpClientRequestBuilder get = client.createGet(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
+    get.bufferBody().send(onSuccess(resp -> {
+      assertEquals(200, resp.statusCode());
+      assertEquals(new WineAndCheese().setCheese("Goat Cheese").setWine("Condrieu"), resp.bodyAs(WineAndCheese.class));
       testComplete();
     }));
     await();

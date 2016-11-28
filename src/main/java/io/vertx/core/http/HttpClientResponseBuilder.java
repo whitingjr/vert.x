@@ -47,10 +47,10 @@ public interface HttpClientResponseBuilder<T> {
   HttpClientResponseBuilder<JsonObject> asJsonObject();
 
   /**
-   * Configure the builder to decode the response using a specified {@code clazz}.
+   * Configure the builder to decode the response using a specified {@code type}.
    *
-   * @return a new {@code HttpClientResponseBuilder} instance decoding the response as specified class
+   * @return a new {@code HttpClientResponseBuilder} instance decoding the response as specified type
    */
-  <T> HttpClientResponseBuilder<T> as(Class<T> clazz);
+  <R> HttpClientResponseBuilder<R> as(Class<R> type);
 
 }
