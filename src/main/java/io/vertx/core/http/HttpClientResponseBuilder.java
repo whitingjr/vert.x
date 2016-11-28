@@ -1,5 +1,6 @@
 package io.vertx.core.http;
 
+import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -51,6 +52,7 @@ public interface HttpClientResponseBuilder<T> {
    *
    * @return a new {@code HttpClientResponseBuilder} instance decoding the response as specified type
    */
+  @GenIgnore
   <R> HttpClientResponseBuilder<R> as(Class<R> type);
 
 }
