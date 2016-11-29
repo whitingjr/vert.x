@@ -46,6 +46,7 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
   String host;
   String requestURI;
   MultiMap headers;
+  long timeout = -1;
 
   HttpClientRequestBuilderImpl(HttpClient client, HttpMethod method) {
     this.client = client;
@@ -57,6 +58,7 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
     this.method = other.method;
     this.port = other.port;
     this.host = other.host;
+    this.timeout = timeout;
     this.requestURI = other.requestURI;
     this.headers = other.headers != null ? new CaseInsensitiveHeaders().addAll(other.headers) : null;
   }
@@ -100,6 +102,13 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
   }
 
   @Override
+  public HttpClientRequestBuilder timeout(long value) {
+    HttpClientRequestBuilderImpl other = new HttpClientRequestBuilderImpl(this);
+    other.timeout = value;
+    return other;
+  }
+
+  @Override
   public void sendStream(ReadStream<Buffer> body, Handler<AsyncResult<HttpClientResponse>> handler) {
     perform(null, body, handler);
   }
@@ -135,6 +144,9 @@ class HttpClientRequestBuilderImpl implements HttpClientRequestBuilder {
         fut.complete(resp);
       }
     });
+    if (timeout > 0) {
+      req.setTimeout(timeout);
+    }
     if (body != null) {
       if (contentType != null) {
         req.putHeader(HttpHeaders.CONTENT_TYPE, contentType);

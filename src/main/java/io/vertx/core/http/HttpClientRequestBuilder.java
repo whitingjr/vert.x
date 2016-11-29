@@ -86,6 +86,17 @@ public interface HttpClientRequestBuilder {
   HttpClientRequestBuilder putHeader(String name, String value);
 
   /**
+   * Configures the amount of time in milliseconds after which if the request does not return any data within the timeout
+   * period an {@link java.util.concurrent.TimeoutException} fails the request.
+   * <p>
+   * Setting zero or a negative {@code value} disables the timeout.
+   *
+   * @param value The quantity of time in milliseconds.
+   * @return a new {@code HttpClientRequestBuilder} instance with the specified timeout
+   */
+  HttpClientRequestBuilder timeout(long value);
+
+  /**
    * Like {@link #send(Handler)} but with an HTTP request {@code body} stream.
    *
    * @param body the body

@@ -20,6 +20,8 @@ import java.io.File;
 import java.net.ConnectException;
 import java.nio.file.Files;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 
 /**
@@ -438,6 +440,21 @@ public class HttpClientRequestBuilderTest extends HttpTestBase {
     HttpClientRequestBuilder get = client.createGet(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
     get.bufferBody().asJsonObject().send(onFailure(err -> {
       assertTrue(err instanceof VertxException);
+      testComplete();
+    }));
+    await();
+  }
+
+  @Test
+  public void testTimeout() throws Exception {
+    AtomicInteger count = new AtomicInteger();
+    server.requestHandler(req -> {
+      count.incrementAndGet();
+    });
+    startServer();
+    HttpClientRequestBuilder get = client.createGet(DEFAULT_HTTP_PORT, DEFAULT_HTTP_HOST, "/somepath");
+    get.timeout(50).send(onFailure(err -> {
+      assertEquals(err.getClass(), TimeoutException.class);
       testComplete();
     }));
     await();
