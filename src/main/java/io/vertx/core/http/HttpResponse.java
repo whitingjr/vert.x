@@ -16,10 +16,13 @@
 package io.vertx.core.http;
 
 import io.vertx.codegen.annotations.CacheReturn;
+import io.vertx.codegen.annotations.Nullable;
 import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.MultiMap;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 /**
  * An HTTP response.
@@ -66,6 +69,34 @@ public interface HttpResponse<T> {
    */
   @CacheReturn
   MultiMap headers();
+
+  /**
+   * Return the first header value with the specified name
+   *
+   * @param headerName  the header name
+   * @return the header value
+   */
+  @Nullable String getHeader(String headerName);
+
+  /**
+   * @return the trailers
+   */
+  @CacheReturn
+  MultiMap trailers();
+
+  /**
+   * Return the first trailer value with the specified name
+   *
+   * @param trailerName  the trailer name
+   * @return the trailer value
+   */
+  @Nullable String getTrailer(String trailerName);
+
+  /**
+   * @return the Set-Cookie headers (including trailers)
+   */
+  @CacheReturn
+  List<String> cookies();
 
   /**
    * @return the response body in the format it was decoded.

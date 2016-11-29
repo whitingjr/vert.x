@@ -29,6 +29,7 @@ import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.streams.ReadStream;
 
+import java.util.List;
 import java.util.function.Function;
 
 /**
@@ -107,6 +108,22 @@ class HttpClientResponseBuilderImpl<T> implements HttpClientResponseBuilder<T> {
               @Override
               public String statusMessage() {
                 return resp.statusMessage();
+              }
+              @Override
+              public String getHeader(String headerName) {
+                return resp.getHeader(headerName);
+              }
+              @Override
+              public MultiMap trailers() {
+                return resp.trailers();
+              }
+              @Override
+              public String getTrailer(String trailerName) {
+                return resp.getTrailer(trailerName);
+              }
+              @Override
+              public List<String> cookies() {
+                return resp.cookies();
               }
               @Override
               public MultiMap headers() {
