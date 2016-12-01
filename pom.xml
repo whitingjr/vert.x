@@ -381,6 +381,54 @@
         <version>2.19.1</version>
         <executions>
           <execution>
+            <id>valid-system-props</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <includes>
+                <include>io/vertx/test/it/ConfigurableSettingsTest.java</include>
+              </includes>
+              <systemProperties>
+                <vertx.http.server.port>1234</vertx.http.server.port>
+                <vertx.http.server.host>wibble</vertx.http.server.host>
+              </systemProperties>
+            </configuration>
+          </execution>
+          <execution>
+            <id>invalid-system-props-1</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <includes>
+                <include>io/vertx/test/it/ConfigurableSettingsTest.java</include>
+              </includes>
+              <systemProperties>
+                <vertx.http.server.port>not-a-port</vertx.http.server.port>
+                <vertx.http.server.host></vertx.http.server.host>
+              </systemProperties>
+            </configuration>
+          </execution>
+          <execution>
+            <id>invalid-system-props-2</id>
+            <goals>
+              <goal>integration-test</goal>
+            </goals>
+            <phase>integration-test</phase>
+            <configuration>
+              <includes>
+                <include>io/vertx/test/it/ConfigurableSettingsTest.java</include>
+              </includes>
+              <systemProperties>
+                <vertx.http.server.port>-10</vertx.http.server.port>
+                <vertx.http.server.host>    </vertx.http.server.host>
+              </systemProperties>
+            </configuration>
+          </execution>
+          <execution>
             <id>no-alpn</id>
             <goals>
               <goal>integration-test</goal>

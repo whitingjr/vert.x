@@ -34,10 +34,34 @@ import java.util.List;
 @DataObject(generateConverter = true)
 public class HttpServerOptions extends NetServerOptions {
 
+  public static final String DEFAULT_HOST_PROP_NAME = "vertx.http.server.host";
+  public static final String DEFAULT_PORT_PROP_NAME = "vertx.http.server.port";
+
   /**
    * Default port the server will listen on = 80
    */
-  public static final int DEFAULT_PORT = 80;  // Default port is 80 for HTTP not 0 from HttpServerOptions
+  public static final int DEFAULT_PORT;  // Default port is 80 for HTTP not 0 from HttpServerOptions
+
+  /**
+   * The default host to listen on = "0.0.0.0" (meaning listen on all available interfaces).
+   */
+  public static final String DEFAULT_HOST;
+
+  static {
+    int port = 80;
+    try {
+      String val = System.getProperty(DEFAULT_PORT_PROP_NAME);
+      if (val != null) {
+        int parsed = Integer.parseInt(val);
+        if (parsed >= 0) {
+          port = parsed;
+        }
+      }
+    } catch (Throwable ignore) {
+    }
+    DEFAULT_PORT = port;
+    DEFAULT_HOST = System.getProperty(DEFAULT_HOST_PROP_NAME, "0.0.0.0");
+  }
 
   /**
    * Default value of whether compression is supported = false
