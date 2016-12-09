@@ -162,8 +162,10 @@ public class Http2ClientTest extends Http2TestBase {
     client.get(DEFAULT_HTTPS_PORT, DEFAULT_HTTPS_HOST, "/somepath", resp -> {
       complete();
     }).exceptionHandler(this::fail).connectionHandler(conn -> {
-      conn.updateSettings(updatedSettings, ar -> {
-        end.complete();
+      vertx.runOnContext(v -> {
+        conn.updateSettings(updatedSettings, ar -> {
+          end.complete();
+        });
       });
     }).end();
     await();
