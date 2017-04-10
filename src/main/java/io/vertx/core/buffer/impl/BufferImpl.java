@@ -16,18 +16,23 @@
 package io.vertx.core.buffer.impl;
 
 
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.util.CharsetUtil;
-import io.vertx.core.buffer.Buffer;
-import io.vertx.core.impl.Arguments;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
-
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
+
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufAllocator;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.PooledByteBufAllocator;
+import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledByteBufAllocator;
+import io.netty.util.CharsetUtil;
+import io.netty.util.internal.SystemPropertyUtil;
+import io.vertx.core.buffer.Buffer;
+import io.vertx.core.impl.Arguments;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 
 /**
  * @author <a href="http://tfox.org">Tim Fox</a>
@@ -41,16 +46,47 @@ public class BufferImpl implements Buffer {
   }
 
   BufferImpl(int initialSizeHint) {
-    buffer = Unpooled.unreleasableBuffer(Unpooled.buffer(initialSizeHint, Integer.MAX_VALUE));
-  }
+     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     if (direct && pooled){
+        buffer = ByteBufUtil.threadLocalDirectBuffer();
+     } else if (direct && !pooled){
+        buffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(initialSizeHint, Integer.MAX_VALUE);
+     } else if (!direct && pooled) {
+        buffer = PooledByteBufAllocator.DEFAULT.buffer(initialSizeHint, Integer.MAX_VALUE);
+     } else {
+        buffer = UnpooledByteBufAllocator.DEFAULT.buffer(initialSizeHint, Integer.MAX_VALUE);
+     }
+   }
 
-  BufferImpl(byte[] bytes) {
-    buffer = Unpooled.unreleasableBuffer(Unpooled.buffer(bytes.length, Integer.MAX_VALUE)).writeBytes(bytes);
-  }
+   BufferImpl(byte[] bytes) {
+     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     if (direct && pooled){
+       buffer = ByteBufAllocator.DEFAULT.directBuffer(bytes.length, Integer.MAX_VALUE);
+     } else if (direct && !pooled){
+        buffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(bytes.length, Integer.MAX_VALUE);
+     } else if (!direct && pooled) {
+        buffer = PooledByteBufAllocator.DEFAULT.buffer(bytes.length, Integer.MAX_VALUE);
+     } else {
+        buffer = UnpooledByteBufAllocator.DEFAULT.buffer(bytes.length, Integer.MAX_VALUE);
+     }
+   }
 
-  BufferImpl(String str, String enc) {
-    this(str.getBytes(Charset.forName(Objects.requireNonNull(enc))));
-  }
+   BufferImpl(String str, String enc) {
+     byte[] b = str.getBytes(Charset.forName(Objects.requireNonNull(enc)));
+     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     if (direct && pooled){
+        buffer = ByteBufAllocator.DEFAULT.directBuffer(b.length);
+     } else if (direct && !pooled){
+        buffer = UnpooledByteBufAllocator.DEFAULT.directBuffer(b.length );
+     } else if (!direct && pooled) {
+        buffer = PooledByteBufAllocator.DEFAULT.buffer(b.length, Integer.MAX_VALUE);
+     } else if (!direct && !pooled) {
+        buffer = UnpooledByteBufAllocator.DEFAULT.buffer(b.length, Integer.MAX_VALUE);
+     }
+   }
 
   BufferImpl(String str, Charset cs) {
     this(str.getBytes(cs));
