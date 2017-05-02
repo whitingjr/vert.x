@@ -40,14 +40,15 @@ import io.vertx.core.json.JsonObject;
 public class BufferImpl implements Buffer {
 
   private ByteBuf buffer;
+  private final boolean direct, pooled;
 
   BufferImpl() {
     this(0);
   }
 
   BufferImpl(int initialSizeHint) {
-     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
-     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
      if (direct && pooled){
         buffer = ByteBufUtil.threadLocalDirectBuffer();
      } else if (direct && !pooled){
@@ -60,8 +61,8 @@ public class BufferImpl implements Buffer {
    }
 
    BufferImpl(byte[] bytes) {
-     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
-     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
      if (direct && pooled){
        buffer = ByteBufAllocator.DEFAULT.directBuffer(bytes.length, Integer.MAX_VALUE);
      } else if (direct && !pooled){
@@ -75,8 +76,8 @@ public class BufferImpl implements Buffer {
 
    BufferImpl(String str, String enc) {
      byte[] b = str.getBytes(Charset.forName(Objects.requireNonNull(enc)));
-     boolean direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
-     boolean pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
      if (direct && pooled){
         buffer = ByteBufAllocator.DEFAULT.directBuffer(b.length);
      } else if (direct && !pooled){
@@ -97,7 +98,17 @@ public class BufferImpl implements Buffer {
   }
 
   BufferImpl(ByteBuf buffer) {
-    this.buffer = Unpooled.unreleasableBuffer(buffer);
+	 direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
+     if (direct && pooled){
+        buffer = Unpooled.unreleasableBuffer(buffer);
+     } else if (direct && !pooled){
+    	 buffer = Unpooled.unreleasableBuffer(buffer);
+     } else if (!direct && pooled) {
+    	 buffer = Unpooled.unreleasableBuffer(buffer);
+     } else if (!direct && !pooled) {
+    	 buffer = Unpooled.unreleasableBuffer(buffer);
+     }
   }
 
   public String toString() {
@@ -563,5 +574,18 @@ public class BufferImpl implements Buffer {
     Buffer b = buffer.getBuffer(pos + 4, pos + 4 + len);
     this.buffer = b.getByteBuf();
     return pos + 4 + len;
+  }
+
+  @Override
+  public void close() {
+	if (direct && pooled){
+      buffer.release();
+    } else if (direct && !pooled){
+      buffer.clear();
+    } else if (!direct && pooled) {
+      buffer.release();
+    } else {
+      buffer.clear();
+    }
   }
 }

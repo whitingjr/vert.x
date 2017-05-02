@@ -101,12 +101,12 @@ public class VertxImpl implements VertxInternal, MetricsProvider {
   private static final String NETTY_IO_RATIO_PROPERTY_NAME = "vertx.nettyIORatio";
   private static final int NETTY_IO_RATIO = Integer.getInteger(NETTY_IO_RATIO_PROPERTY_NAME, 50);
 
-  static {
+//  static {
     // Netty resource leak detection has a performance overhead and we do not need it in Vert.x
 //    ResourceLeakDetector.setLevel(ResourceLeakDetector.Level.DISABLED);
     // Use the JDK deflater/inflater by default
 //    System.setProperty("io.netty.noJdkZlibDecoder", "false");
-  }
+//  }
 
   private final FileSystem fileSystem = getFileSystem();
   private final SharedData sharedData;

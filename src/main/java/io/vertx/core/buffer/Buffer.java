@@ -699,4 +699,5 @@ public interface Buffer extends ClusterSerializable {
 
   BufferFactory factory = ServiceHelper.loadFactory(BufferFactory.class);
 
+  void close();
 }
