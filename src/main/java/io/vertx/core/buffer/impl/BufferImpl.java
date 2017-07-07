@@ -102,17 +102,17 @@ public class BufferImpl implements Buffer {
    this(str, StandardCharsets.UTF_8);
  }
 
- BufferImpl(ByteBuf buffer) {
-  direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
+ BufferImpl(ByteBuf bb) {
+   direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
     if (direct && pooled){
-       buffer = Unpooled.unreleasableBuffer(buffer);
+       buffer = Unpooled.unreleasableBuffer(bb);
     } else if (direct && !pooled){
-      buffer = Unpooled.unreleasableBuffer(buffer);
+      buffer = Unpooled.unreleasableBuffer(bb);
     } else if (!direct && pooled) {
-      buffer = Unpooled.unreleasableBuffer(buffer);
+      buffer = Unpooled.unreleasableBuffer(bb);
     } else if (!direct && !pooled) {
-      buffer = Unpooled.unreleasableBuffer(buffer);
+      buffer = Unpooled.unreleasableBuffer(bb);
     }
  }
 
