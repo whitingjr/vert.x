@@ -46,6 +46,11 @@ public class BufferImpl implements Buffer {
     this(0);
   }
 
+  @Override
+  public boolean isDirectOrPooled() {
+    return direct || pooled;
+  }
+
   BufferImpl(int initialSizeHint) {
     direct = SystemPropertyUtil.getBoolean("buffer.isDirect", false);
     pooled = SystemPropertyUtil.getBoolean("buffer.isPooled", false);
