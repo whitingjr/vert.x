@@ -46,7 +46,12 @@ public abstract class VertxHandler<C extends ConnectionBase> extends ChannelDupl
     if (buf.isDirect() || buf instanceof CompositeByteBuf) {
       try {
         if (buf.isReadable()) {
-          ByteBuf buffer =  allocator.heapBuffer(buf.readableBytes());
+          ByteBuf buffer = null;
+          if (buf.isDirect()){
+            buffer = allocator.directBuffer(buf.readableBytes());
+          } else {
+            buffer = allocator.heapBuffer(buf.readableBytes());
+          }
           buffer.writeBytes(buf);
           return buffer;
         } else {
